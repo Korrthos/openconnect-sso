@@ -1,1 +1,3 @@
-final: prev: { inherit (import ./nix { pkgs = prev; }) openconnect-sso; }
+final: prev: {
+  inherit (import ./nix { pkgs = prev; }) openconnect-sso openconnect;
+}
