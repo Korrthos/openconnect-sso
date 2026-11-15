@@ -10,8 +10,15 @@
 
   };
 
-  outputs = { self, flake-utils, nixpkgs, ... }@inputs:
-    (inputs.flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      flake-utils,
+      nixpkgs,
+      ...
+    }@inputs:
+    (inputs.flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         poetry2nix = inputs.poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
@@ -19,7 +26,8 @@
           inherit pkgs poetry2nix;
           sources = null; # make sure we don't mix flakes and Niv
         };
-      in {
+      in
+      {
         packages = rec {
           inherit (openconnect-pkgs) openconnect-sso;
 
@@ -27,11 +35,13 @@
         };
 
         devShells.default = openconnect-pkgs.shell;
-      }) // {
         overlays = rec {
           default = openconnect-sso;
 
-          openconnect-sso = import ./overlay.nix;
+          openconnect-sso = final: prev: {
+            inherit (openconnect-pkgs) openconnect-sso openconnect;
+          };
         };
-      });
+      }
+    ));
 }
